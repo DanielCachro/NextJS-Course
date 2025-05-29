@@ -2,7 +2,7 @@ import AddToCart from './AddToCart'
 
 export default function ProductCard() {
 	return (
-		<div>
+		<div className=''>
 			<AddToCart />
 		</div>
 	)
