@@ -1,11 +1,11 @@
 import {NextRequest, NextResponse} from 'next/server'
 import schema from './schema'
+import {prisma} from '@/prisma/client'
 
-export function GET(request: NextRequest) {
-	return NextResponse.json([
-		{id: 1, name: 'Daniel'},
-		{id: 2, name: 'John'},
-	])
+export async function GET(request: NextRequest) {
+	const user = await prisma.user.findMany()
+
+	return NextResponse.json(user)
 }
 
 export async function POST(request: NextRequest) {
@@ -16,9 +16,21 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json(validation.error.errors, {status: 400})
 	}
 
-	// Adding body to database
-	// ...
-	//
+	const user = await prisma.user.findUnique({
+		where: {email: body.email},
+	})
 
-	return NextResponse.json({id: Math.random() * 100, name: body.name}, {status: 201})
+	if (user) {
+		return NextResponse.json('User already exists', {status: 409})
+	}
+
+	const newUser = await prisma.user.create({
+		data: {
+			name: body.name,
+			email: body.email,
+		},
+	})
+
+	return NextResponse.json(newUser, {status: 201})
 }
+

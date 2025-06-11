@@ -1,25 +1,15 @@
 import {NextRequest, NextResponse} from 'next/server'
-import schema from './schema'
+import schema, {SchemaType} from './schema'
+import {prisma} from '@/prisma/client'
 
-const PRODUCTS = [
-	{
-		id: 1,
-		name: 'Milk',
-		price: 2.5,
-	},
-	{
-		id: 2,
-		name: 'Bread',
-		price: 3.5,
-	},
-]
+export async function GET(request: NextRequest) {
+	const products = await prisma.product.findMany()
 
-export function GET(request: NextRequest) {
-	return NextResponse.json(PRODUCTS, {status: 200})
+	return NextResponse.json(products, {status: 200})
 }
 
 export async function POST(request: NextRequest) {
-	const body = await request.json()
+	const body: SchemaType = await request.json()
 
 	const validation = schema.safeParse(body)
 
@@ -27,6 +17,17 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json(validation.error.errors, {status: 400})
 	}
 
-	return NextResponse.json({id: Math.random() * 100, name: body.name, price: body.price}, {status: 201})
-}
+	const product = await prisma.product.findUnique({
+		where: {name: body.name},
+	})
 
+	if (product) {
+		return NextResponse.json('Product with this name already exists', {status: 409})
+	}
+
+	const newProduct = await prisma.product.create({
+		data: {name: body.name, price: body.price},
+	})
+
+	return NextResponse.json(newProduct, {status: 201})
+}

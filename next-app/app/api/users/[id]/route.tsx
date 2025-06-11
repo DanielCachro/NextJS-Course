@@ -1,16 +1,22 @@
 import {NextRequest, NextResponse} from 'next/server'
 import schema from '../schema'
+import {prisma} from '@/prisma/client'
 
 interface RouteContext {
 	params: Promise<{
-		id: number
+		id: string
 	}>
 }
 
 export async function GET(request: NextRequest, {params}: RouteContext) {
-	const {id} = await params
+	const {id: stringId} = await params
+	const id = Number(stringId)
 
-	if (id > 10) {
+	const user = await prisma.user.findUnique({
+		where: {id},
+	})
+
+	if (!user) {
 		return NextResponse.json(
 			{
 				error: 'User not found',
@@ -19,12 +25,13 @@ export async function GET(request: NextRequest, {params}: RouteContext) {
 		)
 	}
 
-	return NextResponse.json({id, name: 'Daniel'})
+	return NextResponse.json(user)
 }
 
 export async function PUT(request: NextRequest, {params}: RouteContext) {
 	const body = await request.json()
-	const {id} = await params
+	const {id: stringId} = await params
+	const id = Number(stringId)
 
 	const validation = schema.safeParse(body)
 
@@ -32,20 +39,42 @@ export async function PUT(request: NextRequest, {params}: RouteContext) {
 		return NextResponse.json(validation.error.errors, {status: 400})
 	}
 
-	if (id > 10) {
+	const user = await prisma.user.findUnique({
+		where: {id},
+	})
+
+	if (!user) {
 		return NextResponse.json({error: 'User not found'}, {status: 404})
 	}
-	return NextResponse.json({id: 1, name: body.name})
+
+	const updatedUser = await prisma.user.update({
+		where: {id},
+		data: {
+			name: body.name,
+			email: body.email,
+		},
+	})
+
+	return NextResponse.json(updatedUser)
 }
 
 export async function DELETE(request: NextRequest, {params}: RouteContext) {
-	const {id} = await params
+	const {id: stringId} = await params
+	const id = Number(stringId)
 
-	if (id > 10) {
+	const user = await prisma.user.findUnique({
+		where: {id},
+	})
+
+	if (!user) {
 		return NextResponse.json({error: 'User not found'}, {status: 404})
 	}
 
-	return NextResponse.json({})
+	await prisma.user.delete({
+		where: {id},
+	})
+
+	return NextResponse.json('User successfully deleted', {status: 200})
 }
 
 
