@@ -11,15 +11,15 @@ export default function NavBar() {
 				Next.js
 			</Link>
 			<Link href='/users'>Users</Link>
-			{status === 'loading' && <p>Loading...</p>}
+			<Link href='/gallery'>Gallery</Link>
 
+			{status === 'loading' && <p>Loading...</p>}
 			{status === 'authenticated' && (
 				<p className='flex gap-3'>
 					{session.user!.name}
 					<Link href='/api/auth/signout'>Sign Out</Link>
 				</p>
 			)}
-
 			{status === 'unauthenticated' && <Link href='/api/auth/signin'>Login</Link>}
 		</div>
 	)

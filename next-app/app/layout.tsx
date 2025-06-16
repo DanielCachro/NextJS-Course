@@ -1,17 +1,13 @@
 import type {Metadata} from 'next'
-import {Geist, Geist_Mono} from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 import NavBar from './NavBar'
 import AuthProvider from './auth/Provider'
+import Script from 'next/script'
 
-const geistSans = Geist({
-	variable: '--font-geist-sans',
-	subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-	variable: '--font-geist-mono',
-	subsets: ['latin'],
+const poppins = localFont({
+	src: '../public/fonts/poppins-regular-webfont.woff2',
+	variable: '--font-poppins',
 })
 
 export const metadata: Metadata = {
@@ -26,7 +22,8 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang='en' data-theme='winter'>
-			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+			<Script async src='https://somescript.xyz' />
+			<body className={poppins.variable}>
 				<AuthProvider>
 					<NavBar />
 					<main className='p-5'>{children}</main>
@@ -35,11 +32,4 @@ export default function RootLayout({
 		</html>
 	)
 }
-
-
-
-
-
-
-
 
